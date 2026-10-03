@@ -1,0 +1,249 @@
+name: Gerar APK Android - AI Creator
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Gerar APK Android
+    runs-on: ubuntu-latest
+
+    env:
+      FLUTTER_HOME: ${{ runner.tool_cache }}/flutter
+
+    steps:
+      - name: 1 - Baixar projeto
+        uses: actions/checkout@v4
+
+      - name: 2 - Configurar Java 17
+        id: java
+        uses: actions/setup-java@v4
+        continue-on-error: true
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: 3 - Instalar Flutter estável
+        id: flutter
+        uses: subosito/flutter-action@v2
+        continue-on-error: true
+        with:
+          channel: stable
+          cache: true
+
+      - name: 4 - Diagnosticar ambiente
+        id: envcheck
+        shell: bash
+        continue-on-error: true
+        run: |
+          set +e
+          {
+            echo "=== SISTEMA ==="
+            uname -a
+            echo
+            echo "=== JAVA ==="
+            java -version
+            echo
+            echo "=== FLUTTER ==="
+            command -v flutter
+            flutter --version
+            echo
+            echo "=== DART ==="
+            dart --version
+            echo
+            echo "=== ARQUIVOS PRINCIPAIS ==="
+            ls -la
+            test -f pubspec.yaml && echo "OK: pubspec.yaml" || echo "ERRO: pubspec.yaml não encontrado"
+          } 2>&1 | tee environment.log
+          exit ${PIPESTATUS[0]}
+
+      - name: 5 - Criar Android moderno se necessário
+        id: android
+        shell: bash
+        continue-on-error: true
+        run: |
+          set +e
+          {
+            if [ ! -f android/app/src/main/AndroidManifest.xml ]; then
+              echo "Android não encontrado. Criando estrutura Android V2..."
+              rm -rf android
+              flutter create \
+                --platforms=android \
+                --android-language kotlin \
+                --org com.aicreator \
+                --project-name ai_creator \
+                .
+            else
+              echo "Estrutura Android encontrada."
+            fi
+
+            test -f android/app/src/main/AndroidManifest.xml
+            test -f android/app/src/main/kotlin/com/aicreator/ai_creator/MainActivity.kt
+
+            if grep -R "io.flutter.app.FlutterActivity\|io.flutter.app.FlutterApplication" android 2>/dev/null; then
+              echo "ERRO: referências do Android V1 encontradas."
+              exit 20
+            fi
+          } 2>&1 | tee android.log
+          exit ${PIPESTATUS[0]}
+
+      - name: 6 - Corrigir nome do app
+        shell: bash
+        continue-on-error: true
+        run: |
+          set +e
+          {
+            MANIFEST="android/app/src/main/AndroidManifest.xml"
+            if [ -f "$MANIFEST" ]; then
+              sed -i 's/android:label="[^"]*"/android:label="AI Creator"/g' "$MANIFEST"
+              if ! grep -q 'android:label="AI Creator"' "$MANIFEST"; then
+                sed -i 's/<application /<application android:label="AI Creator" /' "$MANIFEST"
+              fi
+            fi
+            grep -n "AI Creator" "$MANIFEST"
+          } 2>&1 | tee app_name.log
+          exit ${PIPESTATUS[0]}
+
+      - name: 7 - Instalar dependências
+        id: pubget
+        shell: bash
+        continue-on-error: true
+        run: |
+          set +e
+          flutter clean 2>&1 | tee clean.log
+          flutter pub get 2>&1 | tee pubget.log
+          test ${PIPESTATUS[0]} -eq 0
+          exit $?
+
+      - name: 8 - Verificar código Dart
+        id: analyze
+        shell: bash
+        continue-on-error: true
+        run: |
+          set +e
+          flutter analyze 2>&1 | tee analyze.log
+          code=${PIPESTATUS[0]}
+          echo "ANALYZE_EXIT=$code" >> "$GITHUB_ENV"
+          exit $code
+
+      - name: 9 - Testar compilação Dart
+        id: dartcompile
+        shell: bash
+        continue-on-error: true
+        run: |
+          set +e
+          dart compile kernel lib/main.dart -o main.dill 2>&1 | tee dart_compile.log
+          code=${PIPESTATUS[0]}
+          echo "DART_COMPILE_EXIT=$code" >> "$GITHUB_ENV"
+          exit $code
+
+      - name: 10 - Gerar APK release
+        id: apk
+        shell: bash
+        continue-on-error: true
+        run: |
+          set +e
+          flutter build apk --release 2>&1 | tee build.log
+          code=${PIPESTATUS[0]}
+          echo "BUILD_EXIT=$code" >> "$GITHUB_ENV"
+          exit $code
+
+      - name: 11 - Criar diagnóstico EXATO
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "# AI Creator - Diagnóstico"
+            echo
+            echo "## Resultado"
+            echo "- Java setup: ${{ steps.java.outcome }}"
+            echo "- Flutter setup: ${{ steps.flutter.outcome }}"
+            echo "- Ambiente: ${{ steps.envcheck.outcome }}"
+            echo "- Android: ${{ steps.android.outcome }}"
+            echo "- Dependências: ${{ steps.pubget.outcome }}"
+            echo "- Analyze: ${{ steps.analyze.outcome }}"
+            echo "- Compilação Dart: ${{ steps.dartcompile.outcome }}"
+            echo "- APK: ${{ steps.apk.outcome }}"
+            echo
+            echo "## Onde está o problema?"
+            if [ "${{ steps.flutter.outcome }}" != "success" ]; then
+              echo "❌ PROBLEMA EXATO: a instalação/configuração do Flutter falhou."
+              echo "Veja o log da etapa '3 - Instalar Flutter estável'."
+            elif [ "${{ steps.envcheck.outcome }}" != "success" ]; then
+              echo "❌ PROBLEMA EXATO: o ambiente Flutter/Java não foi inicializado corretamente."
+              echo "Veja environment.log."
+            elif [ "${{ steps.android.outcome }}" != "success" ]; then
+              echo "❌ PROBLEMA EXATO: a estrutura Android está ausente ou inválida."
+              echo "Veja android.log."
+            elif [ "${{ steps.pubget.outcome }}" != "success" ]; then
+              echo "❌ PROBLEMA EXATO: as dependências do projeto não puderam ser instaladas."
+              echo "Veja pubget.log."
+            elif [ "${{ steps.analyze.outcome }}" != "success" ]; then
+              echo "❌ PROBLEMA EXATO: existem erros no código Dart."
+              echo "Veja analyze.log para arquivo, linha e mensagem."
+            elif [ "${{ steps.dartcompile.outcome }}" != "success" ]; then
+              echo "❌ PROBLEMA EXATO: o Dart não conseguiu compilar lib/main.dart."
+              echo "Veja dart_compile.log."
+            elif [ "${{ steps.apk.outcome }}" != "success" ]; then
+              echo "❌ PROBLEMA EXATO: o código Dart passou, mas a geração do APK falhou."
+              echo "Veja build.log."
+            else
+              echo "✅ APK criado com sucesso."
+            fi
+            echo
+            echo "## Códigos de saída"
+            echo "- ANALYZE_EXIT=${ANALYZE_EXIT:-não executado}"
+            echo "- DART_COMPILE_EXIT=${DART_COMPILE_EXIT:-não executado}"
+            echo "- BUILD_EXIT=${BUILD_EXIT:-não executado}"
+            echo
+            echo "## Últimas linhas dos logs"
+            for f in environment.log android.log pubget.log analyze.log dart_compile.log build.log; do
+              if [ -f "$f" ]; then
+                echo
+                echo "### $f"
+                tail -n 40 "$f"
+              fi
+            done
+          } > diagnostic_report.md
+
+          cat diagnostic_report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 12 - Enviar diagnóstico
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AI-Creator-Diagnostico
+          path: |
+            diagnostic_report.md
+            environment.log
+            android.log
+            app_name.log
+            clean.log
+            pubget.log
+            analyze.log
+            dart_compile.log
+            build.log
+            main.dill
+          if-no-files-found: ignore
+
+      - name: 13 - Publicar APK
+        if: env.BUILD_EXIT == '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: AI-Creator-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+      - name: 14 - Falhar se o APK não foi criado
+        if: always()
+        shell: bash
+        run: |
+          if [ "${BUILD_EXIT:-1}" != "0" ]; then
+            echo "❌ APK não criado."
+            echo "Baixe o artefato AI-Creator-Diagnostico para ver o problema exato."
+            exit 1
+          fi
+          echo "✅ APK criado com sucesso."
