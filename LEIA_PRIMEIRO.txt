@@ -1,0 +1,15 @@
+AI CREATOR — VERSAO CORRIGIDA
+
+Esta versão corrige os erros de Dart que impediam o APK de compilar:
+- create_screen.dart
+- library_screen.dart
+- main.dart
+- ajuste do sistema de curtidas
+
+O workflow NÃO está neste projeto.
+
+Para gerar o APK, coloque o arquivo gerar-apk.yml na pasta:
+.github/workflows/gerar-apk.yml
+
+Nome do aplicativo: AI Creator
+Código especial de créditos: 20661065

@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /projects/{projectId} {
+      allow read: if resource.data.published == true
+                  || (request.auth != null && resource.data.uid == request.auth.uid);
+
+      allow create: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid;
+
+      allow update: if request.auth != null
+                    && resource.data.uid == request.auth.uid
+                    || (request.auth != null
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes'])
+                        && request.resource.data.likes is int
+                        && request.resource.data.likes >= 0
+                        && request.resource.data.likes <= 1000000);
+
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+  }
+}

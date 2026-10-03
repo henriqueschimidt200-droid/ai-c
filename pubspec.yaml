@@ -1,0 +1,29 @@
+name: ai_creator
+description: AI Creator - imagens, videos e rede social de criadores.
+publish_to: none
+version: 1.0.0+1
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  firebase_core: ^3.15.2
+  firebase_auth: ^5.6.2
+  cloud_firestore: ^5.6.12
+  firebase_storage: ^12.4.10
+  google_sign_in: ^6.2.2
+  image_picker: ^1.1.2
+  uuid: ^4.5.1
+  http: ^1.4.0
+  cached_network_image: ^3.4.1
+  shared_preferences: ^2.5.3
+  video_player: ^2.10.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+flutter:
+  uses-material-design: true
+  assets:
+  - assets_ai_icon.png

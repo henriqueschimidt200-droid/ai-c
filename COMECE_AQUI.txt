@@ -1,0 +1,20 @@
+AI CREATOR — COMECE AQUI
+
+1. Leia README_API_KEY.md
+2. Configure o Firebase com:
+   flutterfire configure
+3. Crie functions/.env a partir de functions/.env.example
+4. Coloque sua HF_TOKEN SOMENTE no functions/.env
+5. Instale as dependências do backend:
+   cd functions
+   npm install
+6. Faça o deploy do backend:
+   firebase deploy --only functions
+7. Envie o projeto para o GitHub.
+8. Vá em Actions > Build APK > Run workflow.
+9. O workflow agora NÃO bloqueia o APK por avisos withOpacity.
+10. Quando terminar: Artifacts > AI-Creator-APK.
+
+IMPORTANTE:
+- Não envie functions/.env para o GitHub.
+- A API Key não deve ficar dentro do APK.

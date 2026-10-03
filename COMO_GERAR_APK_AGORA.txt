@@ -1,0 +1,8 @@
+1. Coloque o conteúdo desta pasta no GitHub.
+2. O workflow NÃO está dentro deste projeto.
+3. Salve o código do workflow separado em:
+   .github/workflows/gerar-apk.yml
+4. No GitHub: Actions > AI Creator - Gerar APK > Run workflow.
+5. Depois de verde, baixe o artefato AI-Creator-APK.
+
+Para o sistema online funcionar, configure Firebase e gere lib/firebase_options.dart com FlutterFire.
