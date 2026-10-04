@@ -1,31 +1,114 @@
-name: Gerar APK
+name: Gerar APK - AI Creator
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
 
 jobs:
   build:
+    name: Compilar APK
     runs-on: ubuntu-latest
 
     steps:
       - name: Baixar projeto
         uses: actions/checkout@v4
 
+      - name: Instalar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
       - name: Instalar Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
 
-      - name: Preparar projeto
+      - name: Mostrar versões
         run: |
-          flutter pub get
+          flutter --version
+          dart --version
+          java -version
+
+      - name: Criar Android
+        run: |
+          rm -rf android
+          flutter create \
+            --platforms=android \
+            --org com.aicreator.app \
+            --project-name ai_creator \
+            .
+
+      - name: Instalar dependências
+        run: flutter pub get
+
+      - name: Verificar projeto
+        run: |
+          echo "===== FLUTTER DOCTOR ====="
+          flutter doctor -v
+
+          echo "===== ARQUIVOS ====="
+          ls -la
+          ls -la android
 
       - name: Gerar APK
         run: |
           flutter build apk --release
 
-      - name: Disponibilizar APK
+      - name: Verificar APK
+        run: |
+          echo "===== APK GERADO ====="
+          ls -lh build/app/outputs/flutter-apk/
+
+          if [ ! -f build/app/outputs/flutter-apk/app-release.apk ]; then
+            echo "ERRO: APK não foi gerado!"
+            exit 1
+          fi
+
+      - name: Enviar APK
         uses: actions/upload-artifact@v4
         with:
           name: AI-Creator-APK
           path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Diagnóstico automático
+        if: failure()
+        run: |
+          echo ""
+          echo "======================================"
+          echo "        BUILD FALHOU"
+          echo "======================================"
+          echo ""
+
+          echo "===== FLUTTER ====="
+          flutter --version || true
+
+          echo ""
+          echo "===== DOCTOR ====="
+          flutter doctor -v || true
+
+          echo ""
+          echo "===== PUBSPEC ====="
+          cat pubspec.yaml || true
+
+          echo ""
+          echo "===== ANDROID ====="
+          find android -maxdepth 3 -type f | sort || true
+
+          echo ""
+          echo "===== BUILD ====="
+          find build -type f 2>/dev/null | sort | tail -100 || true
+
+          echo ""
+          echo "======================================"
+          echo "Veja acima o erro exato."
+          echo "======================================"
