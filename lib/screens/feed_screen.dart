@@ -61,7 +61,7 @@ class _PostCardState extends State<_PostCard> {
           ],
           const SizedBox(height: 10),
           Row(children: [
-            IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(minWidth: 42), onPressed: () async { final wasLiked = liked; setState(() => liked = !wasLiked); await CreatorService.toggleLike(widget.id, wasLiked); }, icon: Icon(liked ? Icons.favorite : Icons.favorite_border, color: liked ? const Color(0xFFFF4D8D) : Colors.white70)),
+            IconButton(padding: EdgeInsets.zero, constraints: const BoxConstraints(minWidth: 42), onPressed: () async { setState(() => liked = !liked); await CreatorService.toggleLike(widget.id, !liked); }, icon: Icon(liked ? Icons.favorite : Icons.favorite_border, color: liked ? const Color(0xFFFF4D8D) : Colors.white70)),
             Text('${(d['likes'] ?? 0) + (liked ? 1 : 0)}', style: const TextStyle(color: Colors.white54)),
             const SizedBox(width: 12), const Icon(Icons.mode_comment_outlined, size: 20, color: Colors.white60), const SizedBox(width: 5), const Text('Comentar', style: TextStyle(color: Colors.white54)),
             const Spacer(), IconButton(onPressed: () {}, icon: const Icon(Icons.ios_share_outlined, color: Colors.white70)),

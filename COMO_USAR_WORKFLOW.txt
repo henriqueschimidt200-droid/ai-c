@@ -1,0 +1,14 @@
+AI CREATOR - GERAR APK
+
+1. Envie TODOS os arquivos desta pasta para o seu repositório GitHub.
+2. Confira se existe:
+   .github/workflows/gerar-apk.yml
+3. No GitHub, abra Actions.
+4. Selecione "AI Creator - Gerar APK".
+5. Clique em "Run workflow".
+6. Espere terminar.
+7. Abra a execução verde.
+8. Em Artifacts, baixe "AI-Creator-APK".
+9. Dentro do ZIP baixado estará app-release.apk.
+
+O nome do aplicativo no celular será AI Creator.

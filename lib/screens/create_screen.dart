@@ -5,7 +5,6 @@ import '../services/credits_service.dart';
 
 class CreateScreen extends StatefulWidget {
   const CreateScreen({super.key});
-
   @override
   State<CreateScreen> createState() => _CreateScreenState();
 }
@@ -50,7 +49,7 @@ class _CreateScreenState extends State<CreateScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Projeto salvo com sucesso.')),
+          const SnackBar(content: Text('Projeto salvo.')),
         );
         prompt.clear();
       }
@@ -221,7 +220,7 @@ class _CreateScreenState extends State<CreateScreen> {
             Text(a, style: const TextStyle(fontWeight: FontWeight.bold)),
             Text(
               b,
-              style: TextStyle(fontSize: 10, color: Colors.white.withOpacity(.45)),
+              style: const TextStyle(fontSize: 10, color: Colors.white54),
             ),
           ],
         ),
@@ -238,7 +237,11 @@ class _CreateScreenState extends State<CreateScreen> {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF311568), Color(0xFF171A3A), Color(0xFF0E111F)],
+          colors: [
+            Color(0xFF311568),
+            Color(0xFF171A3A),
+            Color(0xFF0E111F),
+          ],
         ),
         border: Border.all(color: Colors.white.withOpacity(.09)),
         boxShadow: [
@@ -291,7 +294,11 @@ class _CreateScreenState extends State<CreateScreen> {
               const Spacer(),
               const Text(
                 'Transforme uma ideia\nem uma criação.',
-                style: TextStyle(fontSize: 29, fontWeight: FontWeight.w900, height: 1.02),
+                style: TextStyle(
+                  fontSize: 29,
+                  fontWeight: FontWeight.w900,
+                  height: 1.02,
+                ),
               ),
               const SizedBox(height: 8),
               const Text(

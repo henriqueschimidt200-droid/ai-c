@@ -1,0 +1,17 @@
+COMO GERAR O APK NO GITHUB
+
+1. Crie um repositório no GitHub.
+2. Extraia este ZIP e envie TODOS os arquivos para o repositório.
+3. O arquivo .github/workflows/gerar-apk.yml já está incluído.
+4. Entre em Actions.
+5. Abra "AI Creator - Gerar APK".
+6. Clique em "Run workflow".
+7. Aguarde terminar.
+8. Quando ficar verde, abra a execução e procure "Artifacts".
+9. Baixe "AI-Creator-APK".
+10. Dentro do ZIP baixado estará o app-release.apk.
+
+IMPORTANTE:
+- O projeto original é Flutter, então o GitHub precisa instalar Flutter para gerar o APK.
+- O ZIP original não tinha um projeto Android completo. O workflow cria a plataforma Android automaticamente.
+- O arquivo lib/firebase_options.dart deste projeto ainda é um placeholder. O APK pode ser compilado, mas recursos que dependem do Firebase precisam ser configurados depois com as credenciais reais do seu projeto Firebase.

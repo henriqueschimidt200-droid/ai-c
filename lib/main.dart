@@ -57,14 +57,30 @@ class AICreatorApp extends StatelessWidget {
 
 class _Splash extends StatelessWidget {
   const _Splash();
+
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: Center(
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        ClipRRect(borderRadius: BorderRadius.circular(24), child: Image.asset('assets_ai_icon.png', width: 88, height: 88)),
-        SizedBox(height: 18),
-        Text('AI Creator', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-      ]),
-    ),
-  );
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Image.asset(
+                'assets_ai_icon.png',
+                width: 88,
+                height: 88,
+              ),
+            ),
+            const SizedBox(height: 18),
+            const Text(
+              'AI Creator',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

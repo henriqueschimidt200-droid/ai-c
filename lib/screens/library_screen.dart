@@ -5,7 +5,6 @@ import '../widgets_media.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
-
   @override
   State<LibraryScreen> createState() => _LibraryScreenState();
 }
@@ -106,7 +105,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
               itemBuilder: (_, i) {
                 final doc = docs[i];
                 final d = doc.data();
-                final published = d['published'] == true;
 
                 return Container(
                   clipBehavior: Clip.antiAlias,
@@ -132,15 +130,17 @@ class _LibraryScreenState extends State<LibraryScreen> {
                             Row(
                               children: [
                                 Icon(
-                                  published ? Icons.public : Icons.lock_outline,
+                                  d['published'] == true
+                                      ? Icons.public
+                                      : Icons.lock_outline,
                                   size: 15,
-                                  color: published
+                                  color: d['published'] == true
                                       ? const Color(0xFF67E8F9)
                                       : Colors.white54,
                                 ),
                                 const SizedBox(width: 5),
                                 Text(
-                                  published ? 'Online' : 'Privado',
+                                  d['published'] == true ? 'Online' : 'Privado',
                                   style: const TextStyle(
                                     fontSize: 11,
                                     color: Colors.white60,
@@ -158,12 +158,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                     }
                                   },
                                   itemBuilder: (_) => [
-                                    if (!published)
+                                    if (d['published'] != true)
                                       const PopupMenuItem(
                                         value: 'publish',
                                         child: Text('Publicar'),
                                       ),
-                                    if (published)
+                                    if (d['published'] == true)
                                       const PopupMenuItem(
                                         value: 'hide',
                                         child: Text('Tornar privado'),
